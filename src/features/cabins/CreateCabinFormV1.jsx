@@ -1,6 +1,8 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { useCreateCabin } from "./useCreateCabin";
-import { useEditCabin } from "./useEditCabin";
+import toast from "react-hot-toast";
+
+import { createCabin } from "../../services/apiCabins";
 
 import Input from "../../ui/Input";
 import Form from "../../ui/Form";
@@ -9,52 +11,38 @@ import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import FormRow from "../../ui/FormRow";
 
-function CreateCabinForm({ cabinToEdit = {} }) {
-  const { isCreating, createCabin } = useCreateCabin();
-  const { isEditing, editCabin } = useEditCabin();
-
-  const isWorking = isCreating || isEditing;
-
-  const { id: editId, ...editValues } = cabinToEdit;
-  const isEditSession = Boolean(editId);
-
+function CreateCabinForm() {
   const {
     register,
     handleSubmit,
     reset,
     getValues,
     formState: { errors },
-  } = useForm({
-    defaultValues: isEditSession ? editValues : {},
+  } = useForm();
+
+  const queryClient = useQueryClient();
+
+  const { isLoading: isCreating, mutate } = useMutation({
+    mutationFn: createCabin,
+    onSuccess: () => {
+      toast.success("New cabin successfully created");
+      queryClient.invalidateQueries({
+        queryKey: ["cabins"],
+      });
+      reset();
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   function onSubmit(data) {
-    let image =
-      typeof data.image === "object" && data.image.length > 0
-        ? data.image[0]
-        : cabinToEdit.image;
-
-    if (isEditSession) {
-      editCabin(
-        { newCabinData: { ...data, image }, id: editId },
-        {
-          onSuccess: () => reset(),
-        }
-      );
-    } else
-      createCabin(
-        { ...data, image },
-        {
-          onSuccess: () => reset(),
-        }
-      );
+    mutate({ ...data, image: data.image[0] });
   }
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <FormRow label="Cabin name" error={errors?.name?.message}>
         <Input
-          disabled={isWorking}
+          disabled={isCreating}
           type="text"
           id="name"
           {...register("name", {
@@ -65,7 +53,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
 
       <FormRow label="Max capacity" error={errors?.maxCapacity?.message}>
         <Input
-          disabled={isWorking}
+          disabled={isCreating}
           type="number"
           id="maxCapacity"
           {...register("maxCapacity", {
@@ -80,7 +68,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
 
       <FormRow label="Regular Price" error={errors?.regularPrice?.message}>
         <Input
-          disabled={isWorking}
+          disabled={isCreating}
           type="number"
           id="regularPrice"
           {...register("regularPrice", {
@@ -95,7 +83,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
 
       <FormRow label="Discount" error={errors?.discount?.message}>
         <Input
-          disabled={isWorking}
+          disabled={isCreating}
           type="number"
           id="discount"
           defaultValue={0}
@@ -130,7 +118,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
           accept="image/*"
           type="file"
           {...register("image", {
-            required: isEditSession ? false : "This field is required",
+            required: "This field is required",
           })}
         />
       </FormRow>
@@ -140,26 +128,10 @@ function CreateCabinForm({ cabinToEdit = {} }) {
         <Button variation="secondary" type="reset">
           Cancel
         </Button>
-        <Button disabled={isWorking}>
-          {isEditSession ? "Confirm" : "Create new cabin"}
-        </Button>
+        <Button disabled={isCreating}>Add cabin</Button>
       </FormRow>
     </Form>
   );
 }
 
 export default CreateCabinForm;
-
-// const image = typeof data.image === "string" ? data.image : data.image[0];
-
-// if (isEditSession) {
-//   editCabin({
-//     newCabinData: {
-//       ...data,
-//       image,
-//     },
-//     id: editId,
-//   });
-// } else {
-//   createCabin({ ...data, image });
-// }
