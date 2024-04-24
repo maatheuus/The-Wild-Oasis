@@ -3,7 +3,7 @@ import supabase, { supabaseUrl } from "./supabase";
 export async function getCabins() {
   const { data, error } = await supabase.from("cabins").select("*");
 
-  if (error) {
+  if (error) { 
     console.log(error);
     throw new Error("Cabins could not be loaded");
   }
