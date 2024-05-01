@@ -39,6 +39,8 @@ function Filter({ filterField, options }) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   function handleClick(value) {
+    searchParams.set("page", 1);
+
     searchParams.set(filterField, value);
     setSearchParams(searchParams);
   }
