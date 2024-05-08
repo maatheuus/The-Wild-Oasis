@@ -21,6 +21,7 @@ import Login from "./pages/Login";
 import PageNotFound from "./pages/PageNotFound";
 import Booking from "./pages/Booking";
 import Checkin from "./pages/Checkin";
+import DarkModeProvider from "./context/DarkModeContext";
 
 const router = createBrowserRouter([
   {
@@ -59,7 +60,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <GlobalStyles />
-      <RouterProvider router={router} />
+
+      <DarkModeProvider>
+        <RouterProvider router={router} />
+      </DarkModeProvider>
 
       <Toaster
         position="top-right"
@@ -88,8 +92,8 @@ function App() {
 export default App;
 /**
  *   defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000, // é quantidade de tempo que os dados ficaram armazenados até serem recarregados novamente
+   queries: {
+     staleTime: 60 * 1000, // é quantidade de tempo que os dados ficaram armazenados até serem recarregados novamente
     },
   },
  */

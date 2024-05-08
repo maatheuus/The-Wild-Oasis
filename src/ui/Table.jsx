@@ -1,5 +1,6 @@
-import { createContext, useContext } from "react";
 import styled from "styled-components";
+import { createContext, useContext } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const StyledTable = styled.div`
   border: 1px solid var(--color-grey-200);
@@ -90,7 +91,15 @@ function Row({ children }) {
 }
 
 function Body({ data, render }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = +searchParams.get("page");
   if (!data?.length) return <Empty>No data to show at the moment</Empty>;
+
+  if (page > 0 && !data?.length) {
+    searchParams.set("page", page - 1);
+    setSearchParams(searchParams);
+    return null;
+  }
 
   return <StyledBody row="row">{data.map(render)}</StyledBody>;
 }
