@@ -17,6 +17,7 @@ import Spinner from "../../ui/Spinner";
 import useDeleteBooking from "./useDeleteBooking";
 import Modal from "../../ui/Modal";
 import ConfirmDelete from "../../ui/ConfirmDelete";
+import Empty from "../../ui/Empty";
 
 const HeadingGroup = styled.div`
   display: flex;
@@ -36,6 +37,7 @@ function BookingDetail() {
   const moveBack = useMoveBack();
 
   if (isLoading) return <Spinner />;
+  if (booking === undefined) return <Empty resource="booking" />;
 
   const statusToTagName = {
     unconfirmed: "blue",
